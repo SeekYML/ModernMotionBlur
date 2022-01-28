@@ -1,0 +1,174 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "6.1.0"
+    id "net.minecraftforge.gradle.forge" version "ddb1eb0"
+    id "org.jetbrains.kotlin.jvm" version "1.6.10"
+    id "org.spongepowered.mixin" version "d75e32e"
+    id "java"
+}
+
+version = mod_ver
+group = "gg.seekyml"
+archivesBaseName = mod_name
+
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+compileJava.options.encoding = "UTF-8"
+
+minecraft {
+    /* Define Minecraft properties. */
+    version = "1.8.9-11.15.1.2318-1.8.9"
+    runDir = "run"
+    mappings = "stable_22"
+
+    makeObfSourceJar = false
+
+    clientJvmArgs += '-Delementa.dev=true'
+    clientJvmArgs += '-Delementa.debug=true'
+    clientRunArgs += '--tweakClass gg.essential.loader.stage0.EssentialSetupTweaker'
+    clientRunArgs += "--mixin mixins.motionblur.json"
+}
+
+configurations {
+    /* This creates an additional dependency configuration which shades libraries into your built jar file and adds them to your workspace classpath. */
+    shade
+    implementation.extendsFrom(shade)
+}
+
+repositories {
+    /* Allows us to get dependencies from the central Maven repository. */
+    mavenCentral()
+
+    /* Defines third-party repositories that we have to use for dependencies. */
+    maven {
+        name = 'Sk1er Public'
+        url = 'https://repo.sk1er.club/repository/maven-releases/'
+    }
+    maven {
+        name = 'Jitpack'
+        url = 'https://jitpack.io/'
+    }
+    maven {
+        name = 'Spongepowered Public'
+        url = 'https://repo.spongepowered.org/repository/maven-public/'
+    }
+}
+
+dependencies {
+    /* This defines dependencies required by the mod. */
+    shade ('gg.essential:loader-launchwrapper:1.1.3') {
+        transitive = false
+    }
+    compileOnly('gg.essential:essential-1.8.9-forge:1788')
+    shade ("com.github.LlamaLad7:MixinExtras:0.0.3") {
+        transitive = false
+    }
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.0.3")
+    compileOnly annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT")
+    annotationProcessor("com.google.code.gson:gson:2.2.4")
+    annotationProcessor("com.google.guava:guava:21.0")
+    annotationProcessor("org.ow2.asm:asm-tree:6.2")
+}
+
+jar {
+    /* Defines qualities for Forge and external mods or libraries to use. */
+    manifest.attributes(
+            'ModSide': 'CLIENT',
+            'ForceLoadAsMod': true,
+            "MixinConfigs": "mixins.motionblur.json",
+            'TweakClass': 'gg.essential.loader.stage0.EssentialSetupTweaker',
+            'FMLAT': 'motionblur_at.cfg',
+            'TweakOrder': '0'
+    )
+
+    /* Disables the default jar so we can use a custom naming scheme. */
+    enabled = false
+}
+
+/* This task simply replaces the `${version}` and `${mcversion}` properties in the mcmod.info with the data from Gradle. */
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include "mcmod.info"
+
+        // replace version and mcversion
+        expand "version": project.version, "mcversion": project.minecraft.version
+    }
+
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "mcmod.info"
+    }
+    rename '(.+_at.cfg)', 'META-INF/$1'
+}
+
+tasks.reobfJar.dependsOn tasks.shadowJar
+
+// This adds support to our "shade" dependency configuration so we can embed our libraries into our jar file.
+shadowJar {
+    archiveClassifier.set("")
+    configurations = [project.configurations.shade]
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    relocate("com.llamalad7.mixinextras", "mixinextras")
+
+    exclude 'LICENSE.md'
+    exclude 'pack.mcmeta'
+    exclude 'dummyThing'
+    exclude '**/module-info.class'
+    exclude '*.so'
+    exclude '*.dylib'
+    exclude '*.dll'
+    exclude '*.jnilib'
+    exclude 'ibxm/**'
+    exclude 'com/jcraft/**'
+    exclude 'org/lwjgl/**'
+    exclude 'net/java/**'
+
+    exclude 'META-INF/proguard/**'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/versions/**'
+    exclude 'META-INF/com.android.tools/**'
+
+    exclude 'fabric.mod.json'
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs += "-Xjvm-default=all-compatibility"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs += "-Xjvm-default=all-compatibility"
+    }
+}
+
+mixin {
+    /* Stops mixin from warning us about duplicate refmaps. We don't care. */
+    disableRefMapWarning = true
+
+    /* Sets the mixin obfuscation environment to SEARGE. */
+    defaultObfuscationEnv = searge
+
+    /* Adds our refmap to our main sourceset. */
+    add sourceSets.main, "mixins.motionblur.refmap.json"
+}
+
+reobf {
+    shadowJar {
+        classpath = sourceSets.main.compileClasspath
+    }
+}
+
+sourceSets {
+    dummy
+    main {
+        compileClasspath += dummy.output
+        ext.refMap = "mixins.motionblur.refmap.json"
+        output.resourcesDir = file("${buildDir}/classes/kotlin/main")
+    }
+}

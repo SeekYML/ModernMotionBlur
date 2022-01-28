@@ -1,0 +1,19 @@
+[
+  {
+    "modid": "motionblur",
+    "name": "Modern Motion Blur",
+    "description": "A more modern approach on Motion Blur in Minecraft.",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "",
+    "updateUrl": "",
+    "authorList": [
+      "W-OVERFLOW",
+      "SeekYML"
+    ],
+    "credits": "",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

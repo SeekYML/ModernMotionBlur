@@ -1,0 +1,11 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "minVersion": "0.7",
+  "package": "gg.seekyml.motionblur.mixin",
+  "refmap": "mixin.motionblur.refmap.json",
+  "plugin": "gg.seekyml.motionblur.plugin.RedactionMixinPlugin",
+  "mixins": [
+    "MinecraftMixin"
+  ],
+  "verbose": true
+}
