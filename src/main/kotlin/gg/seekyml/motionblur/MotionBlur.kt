@@ -46,7 +46,7 @@ object MotionBlur {
 
     @Mod.EventHandler
     fun onInitialization(event: FMLInitializationEvent) {
-        MotionBlurConfig.initialize()
+        MotionBlurConfig.preload()
         MotionBlurCommand.register()
         Updater.update()
     }

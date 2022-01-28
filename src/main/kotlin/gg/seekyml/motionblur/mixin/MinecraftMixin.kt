@@ -20,14 +20,15 @@ class MinecraftMixin {
             shift = At.Shift.BEFORE
         )]
     )
-    private fun onStartGame(ci: CallbackInfo) {
+    private fun createMotionBlur(ci: CallbackInfo) {
 
-        if (!enableBlur && blurtype != 1) return
+        if (!enableBlur && blurtype != 1)
+            return
 
         val strength = blurAmount.coerceAtMost(0.99f)
         GL11.glAccum(GL11.GL_MULT, strength)
         GL11.glAccum(GL11.GL_ACCUM, 1.0f - strength)
         GL11.glAccum(GL11.GL_RETURN, 1.0f)
-
     }
+
 }

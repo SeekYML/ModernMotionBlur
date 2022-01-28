@@ -53,18 +53,10 @@ object MotionBlurConfig : Vigilant(File(MotionBlur.modDir, "${MotionBlur.ID}.tom
     @Property(
         type = PropertyType.PERCENT_SLIDER,
         name = "Blur Strength",
-        description = "Determines the strength of the trailing effect",
+        description = "Determines the strength of the trailing effect.",
         category = "General"
     )
-    var blurAmount = 1.0F
-
-    @Property(
-        type = PropertyType.SWITCH,
-        name = "Use Alternate Motion Blur",
-        description = "Uses a different Blur type and may have a different impact on the framerate.",
-        category = "General"
-    )
-    var alternateBlur = false
+    var blurAmount = 0.4F
 
     init {
         initialize()
